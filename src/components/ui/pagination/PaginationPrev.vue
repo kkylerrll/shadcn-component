@@ -1,22 +1,22 @@
 <script setup lang="ts">
-  import { Button } from "@/components/ui/button";
-  import { cn } from "@/lib/utils";
-  import { ChevronLeft } from "lucide-vue-next";
-  import { PaginationPrev, type PaginationPrevProps } from "radix-vue";
-  import { computed, type HTMLAttributes } from "vue";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { ChevronLeft } from "lucide-vue-next";
+import { PaginationPrev, type PaginationPrevProps } from "radix-vue";
+import { computed, type HTMLAttributes } from "vue";
 
-  const props = withDefaults(
-    defineProps<PaginationPrevProps & { class?: HTMLAttributes["class"] }>(),
-    {
-      asChild: true,
-    }
-  );
+const props = withDefaults(
+  defineProps<PaginationPrevProps & { class?: HTMLAttributes["class"] }>(),
+  {
+    asChild: true,
+  },
+);
 
-  const delegatedProps = computed(() => {
-    const { class: _, ...delegated } = props;
+const delegatedProps = computed(() => {
+  const { class: _, ...delegated } = props;
 
-    return delegated;
-  });
+  return delegated;
+});
 </script>
 
 <template>
@@ -32,8 +32,8 @@
   </PaginationPrev>
 </template>
 <style lang="scss">
-  .leftIcon {
-    width: 14px;
-    height: 14px;
-  }
+.leftIcon {
+  width: 14px;
+  height: 14px;
+}
 </style>

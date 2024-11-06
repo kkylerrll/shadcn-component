@@ -30,7 +30,10 @@
     </div>
     <div class="w-[400px] mt-5">
       <p class="text-white">進度條</p>
-      <Progress :modelValue="100" />
+      <Progress :modelValue="100" :generate="true" />
+      <Progress :modelValue="70" class="mt-5" size="secondary" />
+      <Progress :modelValue="50" class="mt-5" />
+      <Progress :modelValue="30" class="mt-5" size="sm" />
     </div>
     <div class="w-[500px] mt-5 bg-white p-3">
       <p>分頁器</p>
@@ -42,30 +45,30 @@
   </div>
 </template>
 <script lang="ts" setup>
-  import { Input } from "@/components/ui/input";
-  import { Progress } from "@/components/ui/progress";
-  import SvgInput from "./share/SvgInput.vue";
-  import PwdInput from "./share/PwdInput.vue";
-  import VerificationInput from "./share/VerificationInput.vue";
-  import CheckLabel from "./share/CheckLabel.vue";
-  import Pagination from "./share/Pagination.vue";
-  import NumberField from "./share/NumberField.vue";
+import { Input } from "@/components/ui/input";
+import { Progress } from "@/components/ui/progress";
+import SvgInput from "./share/SvgInput.vue";
+import PwdInput from "./share/PwdInput.vue";
+import VerificationInput from "./share/VerificationInput.vue";
+import CheckLabel from "./share/CheckLabel.vue";
+import Pagination from "./share/Pagination.vue";
+import NumberField from "./share/NumberField.vue";
 </script>
 <style lang="scss" scoped>
-  .sliderInput {
-    width: 210px;
-    display: grid;
-    grid-template-columns: 9fr 2fr;
-  }
-  .backStageInput {
-    width: 250px;
-    display: grid;
-    grid-template-columns: 5fr 2fr;
-  }
+.sliderInput {
+  width: 210px;
+  display: grid;
+  grid-template-columns: 9fr 2fr;
+}
+.backStageInput {
+  width: 250px;
+  display: grid;
+  grid-template-columns: 5fr 2fr;
+}
 
-  input[type="number"]::-webkit-outer-spin-button,
-  input[type="number"]::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-  }
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
 </style>

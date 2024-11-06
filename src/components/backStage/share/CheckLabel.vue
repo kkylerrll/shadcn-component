@@ -12,22 +12,22 @@
 </template>
 
 <script lang="ts" setup>
-  import { Label } from "@/components/ui/label";
-  import { Checkbox } from "@/components/ui/checkbox";
-  const props = defineProps({
-    placeholder: {
-      type: String,
-      default: "",
-    },
-    iconName: {
-      type: String,
-      require: true,
-    },
-  });
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+const props = defineProps({
+  placeholder: {
+    type: String,
+    default: "",
+  },
+  iconName: {
+    type: String,
+    require: true,
+  },
+});
 </script>
 
 <style lang="scss" scoped>
-  .labelText {
-    color: #fff;
-  }
+.labelText {
+  color: #fff;
+}
 </style>

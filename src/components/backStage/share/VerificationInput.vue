@@ -16,18 +16,18 @@
 </template>
 
 <script lang="ts" setup>
-  import { Input } from "@/components/ui/input";
-  import { Button } from "@/components/ui/button";
-  const props = defineProps({
-    placeholder: {
-      type: String,
-      default: "",
-    },
-    iconName: {
-      type: String,
-      require: true,
-    },
-  });
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+const props = defineProps({
+  placeholder: {
+    type: String,
+    default: "",
+  },
+  iconName: {
+    type: String,
+    require: true,
+  },
+});
 </script>
 
 <style></style>

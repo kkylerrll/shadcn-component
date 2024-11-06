@@ -11,18 +11,18 @@
 </template>
 
 <script lang="ts" setup>
-  import { Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/input";
 
-  const props = defineProps({
-    placeholder: {
-      type: String,
-      default: "",
-    },
-    iconName: {
-      type: String,
-      require: true,
-    },
-  });
+const props = defineProps({
+  placeholder: {
+    type: String,
+    default: "",
+  },
+  iconName: {
+    type: String,
+    require: true,
+  },
+});
 </script>
 
 <style></style>
