@@ -4,6 +4,7 @@ import App from "./App.vue";
 import router from "./router";
 import component from "./components/index";
 import i18n from '@/locales/index';
+import 'virtual:svg-icons-register';
 
 const app = createApp(App);
 app.use(router);
