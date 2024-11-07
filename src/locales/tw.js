@@ -7,6 +7,7 @@ export default {
     tanStackTable: "TanStackTable",
     vuetifyTable: "vuetifyTable",
     shadcnVue: "Shaden-vue",
+    tableOne: "表格",
   },
   dashboard: {
     welcome: "歡迎回來",

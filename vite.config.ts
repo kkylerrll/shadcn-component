@@ -5,16 +5,21 @@ import { createSvgIconsPlugin } from "vite-plugin-svg-icons";
 import path from "path";
 import autoprefixer from "autoprefixer";
 import tailwind from "tailwindcss";
+import { vitePluginFakeServer } from "vite-plugin-fake-server";
 
 // https://vite.dev/config/
 export default defineConfig({
   css: {
     postcss: {
-      plugins: [tailwind(), autoprefixer()],
+      plugins: [
+        tailwind(), 
+        autoprefixer(),		
+      ],
     },
   },
   plugins: [
     vue(),
+    vitePluginFakeServer(),
     createSvgIconsPlugin({
       // eslint-disable-next-line no-undef
       iconDirs: [path.resolve(process.cwd(), "src/assets/icons")],

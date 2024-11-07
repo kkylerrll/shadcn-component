@@ -47,6 +47,15 @@ const router = createRouter({
           },
           component: () => import("@/components/backStage/ShadcnVue.vue"),
         },
+        {
+          path: "tableOne",
+          name: "table",
+          meta: {
+            title: "tableOne",
+            requiredKinds: [1],
+          },
+          component: () => import("@/page/Table/TableOne.vue"),
+        },
       ],
     },
   ],
