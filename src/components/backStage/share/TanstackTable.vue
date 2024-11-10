@@ -1,12 +1,11 @@
 <template>
-  <div class="table-container">
+  <div class="table-container flex-1">
     <Table class="w-full">
       <TableHeader>
         <TableRow
           v-for="headerGroup in table.getHeaderGroups()"
           :key="headerGroup.id"
           class="headerRow"
-          :rowIndex="1"
         >
           <TableHead>
             <input
@@ -26,36 +25,18 @@
               :render="header.column.columnDef.header"
               :props="header.getContext()"
             />
-            <sortBtn :header="header"></sortBtn>
+            <!-- <sortBtn :header="header"></sortBtn> -->
           </TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
-        <template v-for="row in tableRow" :key="row.id">
-          <TableRow :row-index="row.index">
-            <TableCell>
-              <input
-                :id="'checkbox-' + row.id"
-                name="rowCheckbox"
-                type="checkbox"
-                :checked="row.original.selected"
-                aria-label="Select row"
-                @change="(e) => updateSelection(row.id)"
-              />
-            </TableCell>
-            <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id">
-              <FlexRender
-                :render="cell.column.columnDef.cell"
-                :props="cell.getContext()"
-              />
-            </TableCell>
-          </TableRow>
+        <template>
           <TableRow
-            v-if="row.getIsExpanded()"
-            :key="row.id + '-expanded'"
-            class="expanded-row"
+            v-for="row in table.getRowModel().rows"
+            :key="row.id"
+            :data-state="row.getIsSelected() && 'selected'"
           >
-            <TableCell :colspan="cellLength(row)">
+            <TableCell :colspan="row.getAllCells().length">
               <pre :style="{ fontSize: '10px' }">
                   <code>{{ JSON.stringify(row.original, null, 2) }}</code>
                 </pre>
@@ -64,9 +45,10 @@
         </template>
       </TableBody>
     </Table>
+    <pre>{{ JSON.stringify(props.data, null, 2) }}</pre>
   </div>
 </template>
-<script lang="ts" setup>
+<script lang="ts" setup generic="TData">
 import { ref, watch, h, computed, onMounted } from "vue";
 
 import {
@@ -87,24 +69,35 @@ import {
   getExpandedRowModel, // 展開
 } from "@tanstack/vue-table";
 
-const props = defineProps({
-  data: {
-    type: Array,
-    require: true,
-  },
-  columns: {
-    type: Array,
-    require: true,
-  },
-});
-const data = ref(props.data);
+import type { ColumnDef } from "@tanstack/vue-table";
+interface DataTableProps {
+  columns: ColumnDef<TData, any>[];
+  data: TData[];
+}
+const props = defineProps<DataTableProps>();
+const computedData = computed(() => props.data);
+console.log("computedData", computedData.value);
 
 const table = useVueTable({
-  data: data.value || [],
-  columns: props.columns || [],
+  data: computed(() => props.data),
+  get columns() {
+    return props.columns;
+  },
+  getCoreRowModel: getCoreRowModel(),
+  getPaginationRowModel: getPaginationRowModel(),
+  getSortedRowModel: getSortedRowModel(),
+  getFilteredRowModel: getFilteredRowModel(),
+  getExpandedRowModel: getExpandedRowModel(),
 });
-watch(data, (newValue) => {
-  console.log(newValue);
-});
+
+const updateSelection = () => {};
+
+watch(
+  () => props.data,
+  (newData) => {
+    console.log("Data updated:", newData); // 當 data 更新時打印資料
+  },
+  { immediate: true } // 立即執行一次以檢查初始資料
+);
 </script>
 <style lang="sass"></style>

@@ -18,7 +18,8 @@ const data = Mock.mock({
       phone: (/^09\d{8}$/),
       'wid|+1': 1,
       workName: '@csentence(5, 10)',
-      readCount: '@integer(0, 200000)'
+      readCount: '@integer(0, 200000)',
+      status: ''
     },
   ],
 }).users;
