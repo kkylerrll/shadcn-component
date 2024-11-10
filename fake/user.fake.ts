@@ -19,7 +19,8 @@ const data = Mock.mock({
       'wid|+1': 1,
       workName: '@csentence(5, 10)',
       readCount: '@integer(0, 200000)',
-      status: ''
+      status: '@pick(["0", "1"])',
+      createTime: '@date("yyyy-MM-dd")',
     },
   ],
 }).users;

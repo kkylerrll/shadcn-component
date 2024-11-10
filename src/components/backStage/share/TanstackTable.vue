@@ -7,13 +7,6 @@
           :key="headerGroup.id"
           class="headerRow"
         >
-          <TableHead>
-            <input
-              id="select-all"
-              type="checkbox"
-              aria-label="Select all rows"
-            />
-          </TableHead>
           <!-- 自動排序 -->
           <TableHead
             v-for="header in headerGroup.headers"
@@ -30,25 +23,55 @@
         </TableRow>
       </TableHeader>
       <TableBody>
-        <template>
+        <template v-if="table.getRowModel().rows?.length">
           <TableRow
             v-for="row in table.getRowModel().rows"
             :key="row.id"
             :data-state="row.getIsSelected() && 'selected'"
           >
-            <TableCell :colspan="row.getAllCells().length">
-              <pre :style="{ fontSize: '10px' }">
-                  <code>{{ JSON.stringify(row.original, null, 2) }}</code>
-                </pre>
+            <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id">
+              <FlexRender
+                :render="cell.column.columnDef.cell"
+                :props="cell.getContext()"
+              />
             </TableCell>
           </TableRow>
         </template>
       </TableBody>
     </Table>
-    <pre>{{ JSON.stringify(props.data, null, 2) }}</pre>
+    <Pagination
+      v-slot="{ page }"
+      :total="total"
+      :sibling-count="1"
+      show-edges
+      :default-page="page"
+    >
+      <PaginationList v-slot="{ items }" class="flex items-center gap-1">
+        <PaginationFirst />
+        <PaginationPrev />
+        <template v-for="(item, index) in items">
+          <PaginationListItem
+            v-if="item.type === 'page'"
+            :key="index"
+            :value="item.value"
+            as-child
+          >
+            <Button
+              class="w-10 h-10 p-0"
+              :variant="item.value === page ? 'default' : 'outline'"
+            >
+              {{ item.value }}
+            </Button>
+          </PaginationListItem>
+          <PaginationEllipsis v-else :key="item.type" :index="index" />
+        </template>
+        <PaginationNext />
+        <PaginationLast />
+      </PaginationList>
+    </Pagination>
   </div>
 </template>
-<script lang="ts" setup generic="TData">
+<script lang="ts" setup>
 import { ref, watch, h, computed, onMounted } from "vue";
 
 import {
@@ -59,6 +82,18 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+
+import {
+  Pagination,
+  PaginationEllipsis,
+  PaginationFirst,
+  PaginationLast,
+  PaginationList,
+  PaginationListItem,
+  PaginationNext,
+  PaginationPrev,
+} from "@/components/ui/pagination";
+
 import {
   useVueTable,
   FlexRender,
@@ -69,14 +104,16 @@ import {
   getExpandedRowModel, // 展開
 } from "@tanstack/vue-table";
 
+import type { Task } from "@/page/Table/schema";
 import type { ColumnDef } from "@tanstack/vue-table";
+
 interface DataTableProps {
-  columns: ColumnDef<TData, any>[];
-  data: TData[];
+  columns: ColumnDef<Task, any>[];
+  data: Task[];
 }
 const props = defineProps<DataTableProps>();
-const computedData = computed(() => props.data);
-console.log("computedData", computedData.value);
+
+// const computedData = computed(() => props.data);
 
 const table = useVueTable({
   data: computed(() => props.data),
@@ -90,14 +127,16 @@ const table = useVueTable({
   getExpandedRowModel: getExpandedRowModel(),
 });
 
-const updateSelection = () => {};
-
 watch(
   () => props.data,
   (newData) => {
-    console.log("Data updated:", newData); // 當 data 更新時打印資料
+    if (newData && newData.length > 0) {
+      console.log("Data updated:", newData); // 僅當有有效資料時才執行
+    }
   },
-  { immediate: true } // 立即執行一次以檢查初始資料
+  { immediate: true }
 );
+
+const setPage = () => {};
 </script>
 <style lang="sass"></style>
