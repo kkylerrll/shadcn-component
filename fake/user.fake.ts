@@ -2,15 +2,23 @@ import { faker } from "@faker-js/faker";
 // fake/user.fake.ts
 import Mock from "mockjs";
 import { defineFakeRoute } from "vite-plugin-fake-server/client";
-
+const emailDomains = [
+  'gmail.com',
+  'yahoo.com',
+  'example.com',
+  'tw.com',
+];
 const data = Mock.mock({
-  'users|150': [
+  'users|100-200': [
     {
-      id: '@guid',
-      username: '@first',
-      email: '@email',
+      'id|+1': 1,
+      username: '@cname()',
+      email: `${'@last'}@${Mock.Random.pick(emailDomains)}`,
       avatar: '@image("200x200")',
-      role: '@pick(["admin", "user", "dealer"])',
+      phone: (/^09\d{8}$/),
+      'wid|+1': 1,
+      workName: '@csentence(5, 10)',
+      readCount: '@integer(0, 200000)'
     },
   ],
 }).users;
@@ -24,10 +32,10 @@ export default defineFakeRoute([
 			return {
         status: 'success',
         code: 200,
-        data: Mock.Mock({
+        data: Mock.mock({
           'users|1-2': [
             {
-              id: '@guid',
+              id: '@increment',
               username: '@first',
               email: '@email',
               avatar: '@image("200x200")',
