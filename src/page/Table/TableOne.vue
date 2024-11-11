@@ -30,6 +30,7 @@ const sortOrder = ref(""); // 排序 降序 or 降序
 const sortField = ref(""); // 排序欄位
 const filter = ref({});
 const filterStatus = ref("");
+const filterWorkname = ref("");
 const page = ref<number>(1);
 const perPage = ref(10); // 每頁顯示的資料數量
 const total = ref(1);
@@ -45,6 +46,7 @@ const fetchData = async () => {
       sort: sortOrder.value,
       sortField: sortField.value,
       status: filterStatus.value,
+      workname: filterWorkname.value,
     };
     const response = await axios.get("/mock/getUserList", { params });
 
@@ -59,7 +61,7 @@ const fetchData = async () => {
   }
 };
 const columns = [
-  columnHelper.accessor("workName", {
+  columnHelper.accessor("workname", {
     header: "作品名稱",
     enableSorting: false,
   }),
@@ -129,7 +131,12 @@ const handleFilter = (newObject: Filter) => {
   if (newObject.id === "status") {
     filterStatus.value = newObject.value;
   }
-  console.log("filter", filter.value, filterStatus.value);
+  // if (newObject.id === "workname") {
+  //   filterWorkname.value = newObject.value;
+  // }
+  console.log("filter", filter.value);
+  console.log("filterStatus", filterStatus.value);
+  console.log("filterWorkname", filterWorkname.value);
   fetchData();
 };
 </script>

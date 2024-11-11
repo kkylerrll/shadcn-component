@@ -12,7 +12,7 @@ const data = Mock.mock({
       avatar: '@image("200x200")',
       phone: /^09\d{8}$/,
       "wid|+1": 1,
-      workName: "@csentence(5, 10)",
+      workname: "@csentence(5, 10)",
       readCount: "@integer(0, 200000)",
       status: '@pick(["1", "2"])',
       createTime: '@date("yyyy-MM-dd")',
@@ -46,13 +46,19 @@ export default defineFakeRoute([
       const status = Array.isArray(query.status)
         ? query.status[0]
         : query.status || "";
+      // const workname = Array.isArray(query.workname)
+      //   ? query.workname[0]
+      //   : query.workname || "";
 
       // 篩選資料
-      let filteredData = data.filter((item: { status: string }) => {
-        // 檢查狀態欄位是否符合條件
-        const matchesStatus = status ? item.status === status : true;
-        return matchesStatus;
-      });
+      let filteredData = data.filter(
+        (item: { status: string; workname: string }) => {
+          // 檢查狀態欄位是否符合條件
+          const matchesStatus = status ? item.status === status : true;
+          // const matchesWorkname = workname ? item.workname === workname : true;
+          return matchesStatus;
+        }
+      );
 
       // 排序資料
       const sortedData = filteredData.sort(
@@ -68,9 +74,6 @@ export default defineFakeRoute([
       );
 
       // 計算分頁範圍
-      // const start = (page - 1) * perPage;
-      // const end = page * perPage;
-      // const paginatedData = filteredData.slice(start, end);
       const startIndex = (page - 1) * perPage;
       const endIndex = startIndex + perPage;
 
@@ -82,7 +85,6 @@ export default defineFakeRoute([
           page,
           per_page: perPage,
           total_pages: Math.ceil(sortedData.length / perPage),
-          // users: paginatedData,
           users: sortedData.slice(startIndex, endIndex),
         },
       };

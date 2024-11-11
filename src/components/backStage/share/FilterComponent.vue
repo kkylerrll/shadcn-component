@@ -1,5 +1,6 @@
 <template>
   <div class="flex gap-8">
+    <Input v-model="filterWorkname" />
     <!-- 下拉選單 狀態過濾 -->
     <Select v-model="filterStatus">
       <SelectTrigger>
@@ -18,7 +19,8 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { ref, inject, Ref } from "vue";
+import { ref } from "vue";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -42,12 +44,17 @@ const props = defineProps({
 });
 // const table = inject("tableInstance");
 const filterStatus = ref(""); // 狀態過濾
+const filterWorkname = ref(""); // user name 過濾
 const handleFilter = () => {
   const filters = [];
   if (filterStatus.value) {
     filters.push({ id: "status", value: filterStatus.value });
   }
+  if (filterWorkname.value) {
+    filters.push({ id: "workname", value: filterWorkname.value });
+  }
   console.log("filterStatus", filterStatus.value);
+  console.log("filterWorkname", filterWorkname.value);
   console.log("filters", filters);
   props.table.setColumnFilters(filters);
 };
