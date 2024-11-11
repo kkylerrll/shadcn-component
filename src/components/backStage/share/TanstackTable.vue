@@ -1,5 +1,5 @@
 <template>
-  <div class="table-container flex-1">
+  <div class="table-container">
     <Table class="w-full">
       <TableHeader>
         <TableRow
@@ -14,21 +14,19 @@
             scope="col"
             @click="header.column.getToggleSortingHandler()?.($event)"
           >
-            <FlexRender
-              :render="header.column.columnDef.header"
-              :props="header.getContext()"
-            />
-            <!-- <sortBtn :header="header"></sortBtn> -->
+            <template class="flex gap-5 items-center cursor-pointer">
+              <FlexRender
+                :render="header.column.columnDef.header"
+                :props="header.getContext()"
+              />
+              <SortBtn :header="header"></SortBtn>
+            </template>
           </TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
-        <template v-if="table.getRowModel().rows?.length">
-          <TableRow
-            v-for="row in table.getRowModel().rows"
-            :key="row.id"
-            :data-state="row.getIsSelected() && 'selected'"
-          >
+        <template v-for="row in table.getRowModel().rows" :key="row.id">
+          <TableRow :data-state="row.getIsSelected() && 'selected'">
             <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id">
               <FlexRender
                 :render="cell.column.columnDef.cell"
@@ -36,107 +34,119 @@
               />
             </TableCell>
           </TableRow>
+          <TableRow
+            v-if="row.getIsExpanded()"
+            :key="row.id + '-expanded'"
+            class="expanded-row"
+          >
+            <TableCell :colspan="cellLength(row)">
+              <pre :style="{ fontSize: '10px' }">
+                  <code>{{ JSON.stringify(row.original, null, 2) }}</code>
+                </pre>
+            </TableCell>
+          </TableRow>
         </template>
       </TableBody>
     </Table>
-    <Pagination
-      v-slot="{ page }"
+    <!-- <Pagination
+      :page="page"
       :total="total"
-      :sibling-count="1"
-      show-edges
-      :default-page="page"
-    >
-      <PaginationList v-slot="{ items }" class="flex items-center gap-1">
-        <PaginationFirst />
-        <PaginationPrev />
-        <template v-for="(item, index) in items">
-          <PaginationListItem
-            v-if="item.type === 'page'"
-            :key="index"
-            :value="item.value"
-            as-child
-          >
-            <Button
-              class="w-10 h-10 p-0"
-              :variant="item.value === page ? 'default' : 'outline'"
-            >
-              {{ item.value }}
-            </Button>
-          </PaginationListItem>
-          <PaginationEllipsis v-else :key="item.type" :index="index" />
-        </template>
-        <PaginationNext />
-        <PaginationLast />
-      </PaginationList>
-    </Pagination>
+      :totalPage="totalPage"
+      @pageChange="setPage"
+    ></Pagination> -->
   </div>
 </template>
 <script lang="ts" setup>
-import { ref, watch, h, computed, onMounted } from "vue";
+  import { ref, watch, h, computed, onMounted, provide } from "vue";
+  import { Button } from "@/components/ui/button";
+  import SortBtn from "./SortBtn.vue";
+  import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+  } from "@/components/ui/table";
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+  import {
+    useVueTable,
+    FlexRender,
+    getCoreRowModel,
+    getPaginationRowModel, // 分頁
+    getSortedRowModel, // 排序
+    getFilteredRowModel, // 搜尋
+    getExpandedRowModel, // 展開
+  } from "@tanstack/vue-table";
 
-import {
-  Pagination,
-  PaginationEllipsis,
-  PaginationFirst,
-  PaginationLast,
-  PaginationList,
-  PaginationListItem,
-  PaginationNext,
-  PaginationPrev,
-} from "@/components/ui/pagination";
+  import type { Task } from "@/page/Table/schema";
+  import type {
+    ColumnDef,
+    SortingState,
+    ColumnFiltersState,
+    ExpandedState,
+    Table as TanstackTable,
+  } from "@tanstack/vue-table";
+  import { valueUpdater } from "@/lib/utils";
 
-import {
-  useVueTable,
-  FlexRender,
-  getCoreRowModel,
-  getPaginationRowModel, // 分頁
-  getSortedRowModel, // 排序
-  getFilteredRowModel, // 搜尋
-  getExpandedRowModel, // 展開
-} from "@tanstack/vue-table";
+  interface DataTableProps {
+    columns: ColumnDef<Task, any>[];
+    data: Task[];
+  }
+  const props = defineProps<DataTableProps>();
 
-import type { Task } from "@/page/Table/schema";
-import type { ColumnDef } from "@tanstack/vue-table";
+  const emit = defineEmits(["sortingChanged"]);
+  // const page = ref(1); // 當前頁碼
+  // const total = computed(() => props.data.total || 1);
+  // const totalPage = computed<number>(() => props.data.total_pages || 1);
+  const cellLength = (row: {
+    getAllCells: () => { (): any; new (): any; length: any };
+  }) => {
+    return row.getAllCells().length;
+  };
+  const sorting = ref<SortingState>([]); // 排序資料
+  const columnFilters = ref<ColumnFiltersState>([]); // 過濾資料
+  const expanded = ref<ExpandedState>({}); // 展開
 
-interface DataTableProps {
-  columns: ColumnDef<Task, any>[];
-  data: Task[];
-}
-const props = defineProps<DataTableProps>();
+  const table = useVueTable({
+    data: computed(() => props.data),
+    get columns() {
+      return props.columns;
+    },
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getRowCanExpand: () => true,
+    getExpandedRowModel: getExpandedRowModel(),
+    state: {
+      get sorting() {
+        return sorting.value;
+      },
+      get expanded() {
+        return expanded.value;
+      },
+    },
+    onSortingChange: (updaterOrValue) => {
+      valueUpdater(updaterOrValue, sorting);
+      emit("sortingChanged", sorting.value[0]);
+      console.log("sorting", sorting.value[0]);
+    },
+    onColumnFiltersChange: (updaterOrValue) => {
+      valueUpdater(updaterOrValue, columnFilters);
+      console.log("columnFilters", columnFilters.value);
+    },
+    onExpandedChange: (updaterOrValue) => {
+      valueUpdater(updaterOrValue, expanded);
+      console.log("expanded", expanded.value);
+    },
+  }) as TanstackTable<Task>;
 
-// const computedData = computed(() => props.data);
-
-const table = useVueTable({
-  data: computed(() => props.data),
-  get columns() {
-    return props.columns;
-  },
-  getCoreRowModel: getCoreRowModel(),
-  getPaginationRowModel: getPaginationRowModel(),
-  getSortedRowModel: getSortedRowModel(),
-  getFilteredRowModel: getFilteredRowModel(),
-  getExpandedRowModel: getExpandedRowModel(),
-});
-
-watch(
-  () => props.data,
-  (newData) => {
-    if (newData && newData.length > 0) {
-      console.log("Data updated:", newData); // 僅當有有效資料時才執行
-    }
-  },
-  { immediate: true }
-);
-
-const setPage = () => {};
+  // const setPage = (newPage: number) => {
+  //   emit("pageChange", newPage);
+  // };
+  onMounted(() => {
+    provide("tableInstance", table); // 提供table實例
+  });
 </script>
 <style lang="sass"></style>
