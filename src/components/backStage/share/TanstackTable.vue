@@ -85,7 +85,6 @@
     SortingState,
     ColumnFiltersState,
     ExpandedState,
-    Table as TanstackTable,
   } from "@tanstack/vue-table";
   import { valueUpdater } from "@/lib/utils";
 
@@ -138,9 +137,8 @@
     },
     onExpandedChange: (updaterOrValue) => {
       valueUpdater(updaterOrValue, expanded);
-      console.log("expanded", expanded.value);
     },
-  }) as TanstackTable<Task>;
+  });
 
   // const setPage = (newPage: number) => {
   //   emit("pageChange", newPage);

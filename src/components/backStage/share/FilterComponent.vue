@@ -31,21 +31,21 @@
   import { Button } from "@/components/ui/button";
 
   const props = defineProps({
-    // table: {
-    //   type: Object,
-    //   required: true,
-    // },
+    table: {
+      type: Object,
+      required: true,
+    },
     column: {
       type: Object,
       required: true,
     },
   });
-  const table = inject("tableInstance");
+  // const table = inject("tableInstance");
   const filterStatus = ref(""); // 狀態過濾
   const handleFilter = () => {
     const filters: never[] = [];
     console.log(filterStatus.value);
-    table.setColumnFilters(filters);
+    props.table.setColumnFilters(filters);
   };
 </script>
 <style></style>
