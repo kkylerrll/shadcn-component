@@ -18,34 +18,38 @@
   </div>
 </template>
 <script lang="ts" setup>
-  import { ref, inject } from "vue";
-  import {
-    Select,
-    SelectContent,
-    SelectGroup,
-    SelectItem,
-    SelectLabel,
-    SelectTrigger,
-    SelectValue,
-  } from "@/components/ui/select";
-  import { Button } from "@/components/ui/button";
+import { ref, inject, Ref } from "vue";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 
-  const props = defineProps({
-    table: {
-      type: Object,
-      required: true,
-    },
-    column: {
-      type: Object,
-      required: true,
-    },
-  });
-  // const table = inject("tableInstance");
-  const filterStatus = ref(""); // 狀態過濾
-  const handleFilter = () => {
-    const filters: never[] = [];
-    console.log(filterStatus.value);
-    props.table.setColumnFilters(filters);
-  };
+const props = defineProps({
+  table: {
+    type: Object,
+    required: true,
+  },
+  column: {
+    type: Object,
+    required: true,
+  },
+});
+// const table = inject("tableInstance");
+const filterStatus = ref(""); // 狀態過濾
+const handleFilter = () => {
+  const filters = [];
+  if (filterStatus.value) {
+    filters.push({ id: "status", value: filterStatus.value });
+  }
+  console.log("filterStatus", filterStatus.value);
+  console.log("filters", filters);
+  props.table.setColumnFilters(filters);
+};
 </script>
 <style></style>
