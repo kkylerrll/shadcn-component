@@ -1,5 +1,12 @@
 <template>
   <div class="table-container">
+    <!-- <VueDraggable
+      v-model="headerGroup.headers"
+      group="headers"
+      target=".sort-target"
+      v-for="headerGroup in table.getHeaderGroups()"
+      :key="headerGroup.id"
+    > -->
     <Table class="w-full">
       <TableHeader>
         <TableRow
@@ -24,8 +31,8 @@
           </TableHead>
         </TableRow>
       </TableHeader>
-      <TableBody>
-        <template v-for="row in table.getRowModel().rows" :key="row.id">
+      <TableBody v-draggable="tableRow" @update="onUpdated">
+        <template v-for="row in tableRow" :key="row.id">
           <TableRow :data-state="row.getIsSelected() && 'selected'">
             <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id">
               <FlexRender
@@ -41,13 +48,15 @@
           >
             <TableCell :colspan="cellLength(row)">
               <pre :style="{ fontSize: '10px' }">
-                  <code>{{ JSON.stringify(row.original, null, 2) }}</code>
-                </pre>
+                <code>{{ JSON.stringify(row.original, null, 2) }}</code>
+              </pre>
             </TableCell>
           </TableRow>
         </template>
       </TableBody>
     </Table>
+    <!-- </VueDraggable> -->
+
     <!-- <Pagination
       :page="page"
       :total="total"
@@ -57,98 +66,113 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { ref, watch, h, computed, onMounted, provide } from "vue";
-import { Button } from "@/components/ui/button";
-import SortBtn from "./SortBtn.vue";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+  import { ref, watch, h, computed, onMounted, provide } from "vue";
+  import { Button } from "@/components/ui/button";
+  import SortBtn from "./SortBtn.vue";
+  import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+  } from "@/components/ui/table";
 
-import {
-  useVueTable,
-  FlexRender,
-  getCoreRowModel,
-  getPaginationRowModel, // 分頁
-  getSortedRowModel, // 排序
-  getFilteredRowModel, // 搜尋
-  getExpandedRowModel, // 展開
-} from "@tanstack/vue-table";
+  import {
+    useVueTable,
+    FlexRender,
+    getCoreRowModel,
+    getPaginationRowModel, // 分頁
+    getSortedRowModel, // 排序
+    getFilteredRowModel, // 搜尋
+    getExpandedRowModel, // 展開
+  } from "@tanstack/vue-table";
 
-import type { Task } from "@/page/Table/schema";
-import type {
-  ColumnDef,
-  SortingState,
-  ColumnFiltersState,
-  ExpandedState,
-} from "@tanstack/vue-table";
-import { valueUpdater } from "@/lib/utils";
+  import type { Task } from "@/page/Table/schema";
+  import type {
+    ColumnDef,
+    SortingState,
+    ColumnFiltersState,
+    ExpandedState,
+  } from "@tanstack/vue-table";
+  import { valueUpdater } from "@/lib/utils";
+  // import { VueDraggable } from "vue-draggable-plus";
+  import { DraggableEvent, vDraggable } from "vue-draggable-plus";
+  interface DataTableProps {
+    columns: ColumnDef<Task, any>[];
+    data: Task[];
+  }
+  const props = defineProps<DataTableProps>();
 
-interface DataTableProps {
-  columns: ColumnDef<Task, any>[];
-  data: Task[];
-}
-const props = defineProps<DataTableProps>();
-
-const emit = defineEmits(["sortingChanged", "tableInstance", "handleFilter"]);
-// const page = ref(1); // 當前頁碼
-// const total = computed(() => props.data.total || 1);
-// const totalPage = computed<number>(() => props.data.total_pages || 1);
-const cellLength = (row: {
-  getAllCells: () => { (): any; new (): any; length: any };
-}) => {
-  return row.getAllCells().length;
-};
-const sorting = ref<SortingState>([]); // 排序資料
-const columnFilters = ref<ColumnFiltersState>([]); // 過濾資料
-const expanded = ref<ExpandedState>({}); // 展開
-
-const table = useVueTable({
-  data: computed(() => props.data),
-  get columns() {
-    return props.columns;
-  },
-  getCoreRowModel: getCoreRowModel(),
-  getPaginationRowModel: getPaginationRowModel(),
-  getSortedRowModel: getSortedRowModel(),
-  getFilteredRowModel: getFilteredRowModel(),
-  getRowCanExpand: () => true,
-  getExpandedRowModel: getExpandedRowModel(),
-  state: {
-    get sorting() {
-      return sorting.value;
+  const emit = defineEmits([
+    "sortingChanged",
+    "tableInstance",
+    "handleFilter",
+    "handleOrderChanged",
+  ]);
+  // const page = ref(1); // 當前頁碼
+  // const total = computed(() => props.data.total || 1);
+  // const totalPage = computed<number>(() => props.data.total_pages || 1);
+  const cellLength = (row: {
+    getAllCells: () => { (): any; new (): any; length: any };
+  }) => {
+    return row.getAllCells().length;
+  };
+  const sorting = ref<SortingState>([]); // 排序資料
+  const columnFilters = ref<ColumnFiltersState>([]); // 過濾資料
+  const expanded = ref<ExpandedState>({}); // 展開
+  const tableRow = computed(() => {
+    return table.getRowModel().rows;
+  });
+  const table = useVueTable({
+    data: computed(() => props.data),
+    get columns() {
+      return props.columns;
     },
-    get columnFilters() {
-      return columnFilters.value;
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getRowCanExpand: () => true,
+    getExpandedRowModel: getExpandedRowModel(),
+    state: {
+      get sorting() {
+        return sorting.value;
+      },
+      get columnFilters() {
+        return columnFilters.value;
+      },
+      get expanded() {
+        return expanded.value;
+      },
     },
-    get expanded() {
-      return expanded.value;
+    onSortingChange: (updaterOrValue) => {
+      valueUpdater(updaterOrValue, sorting);
+      emit("sortingChanged", sorting.value[0]);
+      console.log("sorting", sorting.value[0]);
     },
-  },
-  onSortingChange: (updaterOrValue) => {
-    valueUpdater(updaterOrValue, sorting);
-    emit("sortingChanged", sorting.value[0]);
-    console.log("sorting", sorting.value[0]);
-  },
-  onColumnFiltersChange: (updaterOrValue) => {
-    valueUpdater(updaterOrValue, columnFilters);
-    emit("handleFilter", columnFilters.value[0]);
-    console.log("columnFilters", columnFilters.value);
-  },
-  onExpandedChange: (updaterOrValue) => {
-    valueUpdater(updaterOrValue, expanded);
-  },
-});
-
-// const setPage = (newPage: number) => {
-//   emit("pageChange", newPage);
-// };
-onMounted(() => {
-  emit("tableInstance", table); // 提供table實例
-});
+    onColumnFiltersChange: (updaterOrValue) => {
+      valueUpdater(updaterOrValue, columnFilters);
+      emit("handleFilter", columnFilters.value[0]);
+      console.log("columnFilters", columnFilters.value);
+    },
+    onExpandedChange: (updaterOrValue) => {
+      valueUpdater(updaterOrValue, expanded);
+    },
+  });
+  const onUpdated = (event: DraggableEvent) => {
+    emit("handleOrderChanged", event.newIndex, event.oldIndex);
+    console.log(
+      "onUpdated",
+      event.item,
+      "newIndex",
+      event.newIndex,
+      "oldIndex",
+      event.oldIndex
+    );
+  };
+  onMounted(() => {
+    emit("tableInstance", table); // 提供table實例
+  });
 </script>
 <style lang="sass"></style>

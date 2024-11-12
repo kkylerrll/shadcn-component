@@ -11,11 +11,11 @@ const data = Mock.mock({
       email: `${"@last"}@${Mock.Random.pick(emailDomains)}`,
       avatar: '@image("200x200")',
       phone: /^09\d{8}$/,
-      "wid|+1": 1,
       workname: "@csentence(5, 10)",
       readCount: "@integer(0, 200000)",
       status: '@pick(["1", "2"])',
       createTime: '@date("yyyy-MM-dd")',
+      "order|+1": 1,
     },
   ],
 }).users;
@@ -43,35 +43,65 @@ export default defineFakeRoute([
       const sortOrder = Array.isArray(query.sortOrder)
         ? query.sortOrder[0]
         : "asc";
+
       const status = Array.isArray(query.status)
         ? query.status[0]
         : query.status || "";
-      // const workname = Array.isArray(query.workname)
-      //   ? query.workname[0]
-      //   : query.workname || "";
+      const workname = Array.isArray(query.workname)
+        ? query.workname[0]
+        : query.workname || "";
 
       // 篩選資料
       let filteredData = data.filter(
-        (item: { status: string; workname: string }) => {
-          // 檢查狀態欄位是否符合條件
-          const matchesStatus = status ? item.status === status : true;
-          // const matchesWorkname = workname ? item.workname === workname : true;
-          return matchesStatus;
-        }
+        (item: { status: string; workname: string }) =>
+          item.status.includes(status) || item.workname.includes(workname)
       );
 
       // 排序資料
-      const sortedData = filteredData.sort(
-        (a: { [x: string]: number }, b: { [x: string]: number }) => {
-          if (sortField) {
-            if (sortOrder === "asc")
-              return a[sortField] > b[sortField] ? 1 : -1;
-            if (sortOrder === "desc")
-              return a[sortField] < b[sortField] ? 1 : -1;
-          }
-          return 0;
+      const sortedData = filteredData.sort((a: string, b: string) => {
+        if (sortField) {
+          if (sortOrder === "asc") return a[sortField] > b[sortField] ? 1 : -1;
+          if (sortOrder === "desc") return a[sortField] < b[sortField] ? 1 : -1;
         }
-      );
+        return 0;
+      });
+
+      // 處理 id 和 order 更新邏輯
+      const id = query.id
+        ? parseInt(Array.isArray(query.id) ? query.id[0] : query.id, 10)
+        : null;
+      const newOrder = query.order
+        ? parseInt(
+            Array.isArray(query.order) ? query.order[0] : query.order,
+            10
+          )
+        : null;
+
+      if (id !== null && newOrder !== null) {
+        // 找到目標資料索引及其原始 order
+        const targetIndex = data.findIndex(
+          (item: { id: number }) => item.id === id
+        );
+        if (targetIndex !== -1) {
+          const oldOrder = data[targetIndex].order;
+          data[targetIndex].order = newOrder;
+
+          // 調整其他資料的 order 值
+          if (newOrder > oldOrder) {
+            data.forEach((item: { order: number }) => {
+              if (item.order > oldOrder && item.order <= newOrder) {
+                item.order -= 1;
+              }
+            });
+          } else if (newOrder < oldOrder) {
+            data.forEach((item: { order: number }) => {
+              if (item.order >= newOrder && item.order < oldOrder) {
+                item.order += 1;
+              }
+            });
+          }
+        }
+      }
 
       // 計算分頁範圍
       const startIndex = (page - 1) * perPage;
