@@ -1,12 +1,5 @@
 <template>
   <div class="table-container">
-    <!-- <VueDraggable
-      v-model="headerGroup.headers"
-      group="headers"
-      target=".sort-target"
-      v-for="headerGroup in table.getHeaderGroups()"
-      :key="headerGroup.id"
-    > -->
     <Table class="w-full">
       <TableHeader>
         <TableRow
@@ -55,14 +48,6 @@
         </template>
       </TableBody>
     </Table>
-    <!-- </VueDraggable> -->
-
-    <!-- <Pagination
-      :page="page"
-      :total="total"
-      :totalPage="totalPage"
-      @pageChange="setPage"
-    ></Pagination> -->
   </div>
 </template>
 <script lang="ts" setup>
@@ -172,7 +157,7 @@
     );
   };
   onMounted(() => {
-    emit("tableInstance", table); // 提供table實例
+    emit("tableInstance", table); // 提供table
   });
 </script>
 <style lang="sass"></style>

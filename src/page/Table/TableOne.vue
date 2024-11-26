@@ -1,6 +1,7 @@
 <template>
   <div class="flex flex-col flex-1">
     <FilterComponent :table="table" :column="columns"></FilterComponent>
+    <DatePicker></DatePicker>
     <TanstackTable
       :data="tableData"
       :columns="columns"
@@ -22,6 +23,7 @@
   import TanstackTable from "@/components/backStage/share/TanstackTable.vue";
   import Pagination from "@/components//backStage/share/Pagination.vue";
   import FilterComponent from "@/components/backStage/share/FilterComponent.vue";
+  import DatePicker from "@/components/backStage/share/DatePicker.vue";
   import { createColumnHelper } from "@tanstack/vue-table";
   import type { Task } from "./schema";
   import axios from "axios";
@@ -35,7 +37,7 @@
   const draggableData = ref({}); // 拖曳資料
   const idArray = ref([]); // id 陣列
   const page = ref<number>(1);
-  const perPage = ref(10); // 每頁顯示的資料數量
+  const perPage = ref(7); // 每頁顯示的資料數量
   const total = ref(1);
   const totalPage = ref(1);
   let tableData = ref([]);
